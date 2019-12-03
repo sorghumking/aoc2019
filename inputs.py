@@ -12,3 +12,17 @@ def parse_day2():
     orig[2] = 2
     return orig
 
+def parse_day3(inputfile):
+    numCharPattern = "([RLUD])([0-9]+)"
+    with open(inputfile) as f:
+        lines = f.readlines()
+        wires = []
+        for idx in range(2):
+            strs = lines[idx].strip().split(',')
+            # print(strs)
+            w = []
+            for s in strs:
+                foo = re.match(numCharPattern, s)
+                w.append((foo.groups()[0], int(foo.groups()[1])))
+            wires.append(w)
+    return wires
