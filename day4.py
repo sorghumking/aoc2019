@@ -20,7 +20,6 @@ def legit(pw, double_check=True):
         # print("Bad length")
         return False
     double = False
-    skip_indices = []
     for idx, c in enumerate(spw):
         if idx <= 4:
             if double_check:
@@ -37,7 +36,7 @@ def legit(pw, double_check=True):
     #     print("No double found")
     return double
 
-# fucking gross, surely there's a better way
+# f*cking gross, surely there's a better way
 def legit2(pw):
     spw = str(pw)
     start_idx = 0
