@@ -26,3 +26,12 @@ def parse_day3(inputfile):
                 w.append((foo.groups()[0], int(foo.groups()[1])))
             wires.append(w)
     return wires
+
+def parse_day6(inputfile):
+    orbits = []
+    pattern = "([A-Z0-9]+)\)([A-Z0-9]+)"
+    with open(inputfile) as f:
+        for l in f.readlines():
+            tokens = re.match(pattern, l.strip())
+            orbits.append(tokens.groups())
+    return orbits
