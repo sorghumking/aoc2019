@@ -1,34 +1,24 @@
 from inputs import parse_day6
 
 def part1(orbits):
-    omap = {}
-    planets = list(set([item for o in orbits for item in o]))
-    for o in orbits: # build map
-        if o[0] not in omap:
-            omap[o[0]] = [o[1]]
-        else:
-            omap[o[0]].append(o[1])
+    planets = list(set([item for o in orbits for item in o])) # list of unique planets
 
-    # find leaves - planets with no direct orbit
-    leaves = []
+    omap = {} # key: child, value: parent
+    for parent, child in orbits: # build map
+        if child in omap:
+            print("Child already exists in omap, something is wrong.")
+        omap[child] = parent
+
+    # brute force: count steps in path back to root for each planet
+    total = 0
     for p in planets:
-        if p not in omap:
-            leaves.append(p)
-    
-    for leaf in leaves:
-        depth = 0
-        for key, val in omap.items():
-            if leaf in val:
-                depth += 1
-                # key is parent planet
+        while p in omap:
+            total += 1
+            p = omap[p]
+    print("Total orbits = {}".format(total))
 
-    # print(omap)
-
-def get_depth(node, omap):
-    pass
-    
 if __name__ == "__main__":
-    orbits = parse_day6("day6example.txt")
-    # orbits = parse_day6("day6input.txt")
+    # orbits = parse_day6("day6example.txt")
+    orbits = parse_day6("day6input.txt")
     # print(orbits)
     part1(orbits)
