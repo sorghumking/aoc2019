@@ -3,6 +3,7 @@ class Intcode:
     def __init__(self, program, initial_inputs):
         self.program = program
         self.idx = 0 # current position in program
+        self.relbase = 0
         self.inputs = initial_inputs
         self.output = None
         self.halted = False
@@ -32,30 +33,35 @@ class Intcode:
             strinst = str(inst)
             split_idx = len(strinst) - 2
             inst = int(strinst[split_idx:])
-            params = list(reversed([int(c) for c in strinst[:split_idx]]))
+            modes = list(reversed([int(c) for c in strinst[:split_idx]]))
             # print("Code {} = opcode {}".format(self.program[idx], inst))
-            # print("Params = {}".format(params))
+            # print("Parameter modes = {}".format(modes))
             if inst in [1,2,5,6,7,8]:
-                while len(params) < 3:
-                    params.append(0) # add zeroes for missing params
+                while len(modes) < 3:
+                    modes.append(0) # add zeroes for missing params
 
             if inst in [1,2,7,8]:
-                val1 = self.get(self.program[idx+1]) if params[0] == 0 else self.program[idx+1]
-                val2 = self.get(self.program[idx+2]) if params[1] == 0 else self.program[idx+2]
-                val3 = self.program[idx+3]
+                # val1 = self.get(self.program[idx+1]) if modes[0] == 0 else self.program[idx+1]
+                # val2 = self.get(self.program[idx+2]) if modes[1] == 0 else self.program[idx+2]
+                # val3 = self.program[idx+3]
+                val1 = self.get_value(idx+1, modes[0])
+                val2 = self.get_value(idx+2, modes[1])
+                val3 = self.get_value(idx+3, modes[2] if modes[2] != 0 else 1)
                 vals = [val1, val2, val3]
             elif inst == 3:
                 vals = [self.get(self.program[idx + 1])] # wrong? Never gets hit but should drop the self.get I think....
             elif inst == 4:
-                vals = [self.get(self.program[idx+1]) if params[0] == 0 else self.program[idx+1]]
+                vals = [self.get(self.program[idx+1]) if modes[0] == 0 else self.program[idx+1]]
             elif inst == 5 or inst == 6:
-                val1 = self.get(self.program[idx + 1]) if params[0] == 0 else self.program[idx + 1]
-                val2 = self.get(self.program[idx + 2]) if params[1] == 0 else self.program[idx + 2]
+                val1 = self.get(self.program[idx + 1]) if modes[0] == 0 else self.program[idx + 1]
+                val2 = self.get(self.program[idx + 2]) if modes[1] == 0 else self.program[idx + 2]
                 vals = [val1, val2]
+            elif inst == 9:
+                vals = [self.get(self.program[idx + 1]) if modes[0] == 0 else self.program[idx + 1]]
         else:
             # print("Basic opcode = {}".format(inst))
             if inst == 1 or inst == 2:
-                vals = [self.get(self.program[idx + v]) for v in range(1,3)]
+                vals = [self.get(self.program[idx + v]) for v in [1,2]]
                 vals.append(self.program[idx + 3])
             elif inst == 3:
                 vals = [self.program[idx + 1]]
@@ -67,10 +73,20 @@ class Intcode:
                 val1 = self.get(self.program[idx + 1])
                 val2 = self.get(self.program[idx + 2])
                 vals = [val1, val2, self.program[idx + 3]]
+            elif inst == 9:
+                vals = [self.program[idx + 1]]
             else:
                 print("Unexpected instruction: {}".format(inst))
 
         return inst, vals
+
+    def get_value(self, param, mode):
+        if mode == 0:
+            return self.get(self.program[param])
+        elif mode == 1:
+            return self.program[param]
+        elif mode == 2:
+            return self.program[param + self.relbase]
 
     def process(self, stop_on_output=False):
         while True:
@@ -116,6 +132,9 @@ class Intcode:
                 new_val = 1 if (vals[0] < vals[1] and inst == 7) or (vals[0] == vals[1] and inst == 8) else 0
                 self.put(new_val, vals[2])
                 self.idx += 4
+            elif inst == 9:
+                self.relbase += vals[0]
+                self.idx += 2
             else:
                 print("Unexpected instruction: {}".format(inst))
                 return None
