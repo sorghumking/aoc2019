@@ -35,3 +35,8 @@ def parse_day6(inputfile):
             tokens = re.match(pattern, l.strip())
             orbits.append(tokens.groups())
     return orbits
+
+def parse_day8(inputfile):
+    with open(inputfile) as f:
+        image = f.readlines()[0].strip()
+    return image
