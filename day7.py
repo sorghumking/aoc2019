@@ -4,20 +4,34 @@ from common import Intcode
 
 def solve1(program):
     max_signal = 0
-    for idx, perm in enumerate(permutations([0,1,2,3,4])):
+    for perm in permutations([0,1,2,3,4]):
         last_output = 0
         for phase in perm:
             working_program = program.copy()
             comp = Intcode(working_program, [phase, last_output])
-            comp.process()
-            last_output = comp.output
+            last_output = comp.process()
         if last_output > max_signal:
             max_signal = last_output
     print("Maximum signal = {}".format(max_signal))
+    return max_signal
 
 def solve2(program):
-    pass
-
+    max_signal = 0
+    for perm in permutations([5,6,7,8,9]):
+        last_output = 0
+        computers = []
+        for phase in perm:
+            new_comp = Intcode(program.copy(), [phase, last_output])
+            last_output = new_comp.process(stop_on_output=True)
+            computers.append(new_comp)
+        while not computers[4].halted:
+            for c in computers:
+                c.inputs = [last_output]
+                last_output = c.process(stop_on_output=True)
+        if last_output > max_signal:
+            max_signal = last_output
+    print("Maximum signal (part 2) = {}".format(max_signal))
+    return max_signal
 
 
 if __name__ == "__main__":
@@ -27,4 +41,5 @@ if __name__ == "__main__":
     program_p1_ex3 = [3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0]
     program_p2_ex1 = [3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5]
     program_p2_ex2 = [3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10]
-    solve1(program)
+    # solve1(program)
+    solve2(program)

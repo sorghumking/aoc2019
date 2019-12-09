@@ -2,8 +2,10 @@
 class Intcode:
     def __init__(self, program, initial_inputs):
         self.program = program
+        self.idx = 0 # current position in program
         self.inputs = initial_inputs
         self.output = None
+        self.halted = False
 
     def put(self, val, dest_idx):
         # print("put {} at {}".format(val, dest_idx))
@@ -70,45 +72,52 @@ class Intcode:
 
         return inst, vals
 
-    def process(self):
-        idx = 0
+    def process(self, stop_on_output=False):
         while True:
-            inst = self.program[idx]
+            inst = self.program[self.idx]
             if inst == 99:
                 # print("Halt")
+                self.halted = True
                 break
 
-            inst, vals = self.parse_instruction(inst, idx)
+            inst, vals = self.parse_instruction(inst, self.idx)
             if inst == 1:
                 # print("adding: {}".format(vals))
                 self.add(vals[0], vals[1], vals[2])
-                idx += 4
+                self.idx += 4
             elif inst == 2:
                 # print("multiplying: {}".format(vals))
                 self.mul(vals[0], vals[1], vals[2])
-                idx += 4
+                self.idx += 4
             elif inst == 3:
+                if len(self.inputs) == 0:
+                    print("Need input but self.inputs is empty")
+                    return None
                 cur_input = self.inputs.pop(0) # pop element 0
                 # print("Input: putting {} at {}".format(cur_input, vals[0]))
                 self.put(cur_input, vals[0])
-                idx += 2
+                self.idx += 2
             elif inst == 4:
-                print("Output: {}".format(vals[0]))
+                # print("Output: {}".format(vals[0]))
                 self.output = vals[0]
-                idx += 2
+                self.idx += 2
+                if stop_on_output:
+                    return self.output
             elif inst == 5 or inst == 6:
-                # test = self.get(self.program[idx + 1])
+                # test = self.get(self.program[self.idx + 1])
                 test = vals[0]
                 if (test == 0 and inst == 6) or (test != 0 and inst == 5):
                     # do jump
                     new_idx = vals[1] #self.get(self.program[idx + 2])
-                    idx = new_idx
+                    self.idx = new_idx
                 else:
-                    idx += 3
+                    self.idx += 3
             elif inst == 7 or inst == 8:
                 new_val = 1 if (vals[0] < vals[1] and inst == 7) or (vals[0] == vals[1] and inst == 8) else 0
                 self.put(new_val, vals[2])
-                idx += 4
+                self.idx += 4
             else:
                 print("Unexpected instruction: {}".format(inst))
-                return
+                return None
+        return self.output
+
