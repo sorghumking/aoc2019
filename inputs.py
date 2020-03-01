@@ -40,3 +40,15 @@ def parse_day8(inputfile):
     with open(inputfile) as f:
         image = f.readlines()[0].strip()
     return image
+
+def parse_day10(inputfile):
+    asteroids = []
+    station_pos = None
+    with open(inputfile) as f:
+        for y, l in enumerate(f.readlines()):
+            for x, c in enumerate(l):
+                if c == '#':
+                    asteroids.append((x,y))
+                if c == 'X':
+                    station_pos = (x,y)
+    return asteroids, station_pos
