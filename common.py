@@ -6,8 +6,17 @@ class Intcode:
         self.relbase = 0
         self.inputs = initial_inputs
         self.output = None
+        self.output_log = []
         self.halted = False
         self.op2len = {1:3, 2:3, 3:1, 4:1, 5:2, 6:2, 7:3, 8:3, 9:1}
+        self.output_listeners = []
+
+    def add_output_listener(self, listener):
+        self.output_listeners.append(listener)
+
+    def broadcast_output(self):
+        for listen_func in self.output_listeners:
+            listen_func()
 
     def put(self, val, dest_idx):
         # print("put {} at {}".format(val, dest_idx))
@@ -157,7 +166,9 @@ class Intcode:
             elif inst == 4:
                 print("Output: {}".format(vals[0]))
                 self.output = vals[0]
+                self.output_log.append(vals[0])
                 self.idx += 2
+                self.broadcast_output()
                 if stop_on_output:
                     return self.output
             elif inst == 5 or inst == 6:
