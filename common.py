@@ -164,7 +164,7 @@ class Intcode:
                 self.put(cur_input, vals[0])
                 self.idx += 2
             elif inst == 4:
-                print("Output: {}".format(vals[0]))
+                # print("Output: {}".format(vals[0]))
                 self.output = vals[0]
                 self.output_log.append(vals[0])
                 self.idx += 2
